@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "claudeguard"
+version = "0.1.0"
+description = "Claude Code security guard - fixes broken permission system with intelligent pattern matching"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "claudeguard contributors", email = "tarovard@users.noreply.github.com"},
+]
+requires-python = ">=3.10"
+keywords = ["claude-code", "security", "permissions", "hook", "cli", "pattern-matching", "ai-tools"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: Security",
+    "Topic :: System :: Shells",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "click>=8.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/tarovard/claudeguard"
+Repository = "https://github.com/tarovard/claudeguard.git"
+Issues = "https://github.com/tarovard/claudeguard/issues"
+
+[project.scripts]
+claudeguard = "claudeguard.cli:cli"
+claudeguard-hook = "claudeguard.hook:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.0",
+]
+docs = []
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+exclude = ["build/", "dist/"]
+disable_error_code = ["misc"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "UP", "B", "S", "PL", "RUF"]
+ignore = ["PLR0911", "PLR2004", "S108", "COM812", "ISC001"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "PLR2004", "E501", "PLC0415"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.8.6",
+    "mypy>=1.17.1",
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.1",
+    "ruff>=0.12.8",
+    "twine>=6.1.0",
+    "types-pyyaml>=6.0.12.20250809",
+]

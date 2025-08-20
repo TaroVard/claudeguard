@@ -8,6 +8,7 @@ import shutil
 import string
 import sys
 from collections.abc import Callable
+from importlib import metadata
 from pathlib import Path
 from typing import Any
 
@@ -150,6 +151,7 @@ def _load_template_data(template_file: Path, template_name: str) -> dict[str, An
 
 
 @click.group()
+@click.version_option(version=metadata.version("claudeguard"), prog_name="claudeguard")
 def cli() -> None:
     """claudeguard - Claude Code security guard with reliable permissions."""
 

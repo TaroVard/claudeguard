@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "claudeguard"
-version = "0.1.0"
+version = "0.1.1"
 description = "Claude Code security guard - fixes broken permission system with intelligent pattern matching"
 readme = "README.md"
 license = "MIT"

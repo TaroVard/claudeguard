@@ -296,14 +296,19 @@ class TestDefaultProfileGeneration:
         rule_patterns = [rule.pattern for rule in profile.rules]
 
         assert "Read(*)" in rule_patterns
-        assert "Edit(*.md)" in rule_patterns
-        assert "Edit(src/**)" in rule_patterns
-        assert "Edit(*.py)" in rule_patterns
+        assert "LS(*)" in rule_patterns
+        assert "Glob(*)" in rule_patterns
+        assert "Grep(*)" in rule_patterns
+        assert "TodoWrite(*)" in rule_patterns
+        assert "Task(*)" in rule_patterns
         assert "Bash(git status)" in rule_patterns
-        assert "Bash(git diff)" in rule_patterns
+        assert "Bash(git diff*)" in rule_patterns
         assert "Bash(git log*)" in rule_patterns
-        assert "Bash(git push*)" in rule_patterns
-        assert "Bash(rm -rf*)" in rule_patterns
+        assert "Bash(git show*)" in rule_patterns
+        assert "Bash(git branch*)" in rule_patterns
+        assert "Bash(uv run pytest*)" in rule_patterns
+        assert "Write(*)" in rule_patterns
+        assert "MultiEdit(*)" in rule_patterns
         assert "*" in rule_patterns
 
     def test_default_profile_rule_actions_are_secure(self, temp_dir) -> None:
@@ -323,14 +328,18 @@ class TestDefaultProfileGeneration:
         rule_actions = {rule.pattern: rule.action for rule in profile.rules}
 
         assert rule_actions["Read(*)"] == "allow"
-        assert rule_actions["Edit(*.md)"] == "allow"
-        assert rule_actions["Edit(src/**)"] == "ask"
-        assert rule_actions["Edit(*.py)"] == "ask"
+        assert rule_actions["LS(*)"] == "allow"
+        assert rule_actions["Glob(*)"] == "allow"
+        assert rule_actions["Grep(*)"] == "allow"
+        assert rule_actions["TodoWrite(*)"] == "allow"
+        assert rule_actions["Task(*)"] == "allow"
         assert rule_actions["Bash(git status)"] == "allow"
-        assert rule_actions["Bash(git diff)"] == "allow"
+        assert rule_actions["Bash(git diff*)"] == "allow"
         assert rule_actions["Bash(git log*)"] == "allow"
-        assert rule_actions["Bash(git push*)"] == "ask"
-        assert rule_actions["Bash(rm -rf*)"] == "deny"
+        assert rule_actions["Bash(git show*)"] == "allow"
+        assert rule_actions["Bash(uv run pytest*)"] == "allow"
+        assert rule_actions["Write(*)"] == "ask"
+        assert rule_actions["MultiEdit(*)"] == "ask"
         assert rule_actions["*"] == "ask"
 
     def test_default_profile_uses_factory_rules(self) -> None:

@@ -152,14 +152,18 @@ class TestInitWithProfilesDirectory:
         patterns = [rule["pattern"] for rule in rules]
 
         assert "Read(*)" in patterns
-        assert "Edit(*.md)" in patterns
-        assert "Edit(*.txt)" in patterns
-        assert "Edit(src/**)" in patterns
+        assert "LS(*)" in patterns
+        assert "Glob(*)" in patterns
+        assert "Grep(*)" in patterns
+        assert "TodoWrite(*)" in patterns
+        assert "Task(*)" in patterns
         assert "Bash(git status)" in patterns
-        assert "Bash(git diff)" in patterns
+        assert "Bash(git diff*)" in patterns
         assert "Bash(git log*)" in patterns
-        assert "Bash(rm -rf*)" in patterns
-        assert "Bash(sudo *)" in patterns
+        assert "Bash(git show*)" in patterns
+        assert "Bash(uv run pytest*)" in patterns
+        assert "Write(*)" in patterns
+        assert "MultiEdit(*)" in patterns
         assert "*" in patterns  # Catch-all rule
 
     def test_default_profile_has_secure_actions(self, temp_dir) -> None:
@@ -187,15 +191,17 @@ class TestInitWithProfilesDirectory:
         rule_actions = {rule["pattern"]: rule["action"] for rule in profile_data["rules"]}
 
         assert rule_actions["Read(*)"] == "allow"
-        assert rule_actions["Edit(*.md)"] == "allow"
+        assert rule_actions["LS(*)"] == "allow"
+        assert rule_actions["Glob(*)"] == "allow"
+        assert rule_actions["Grep(*)"] == "allow"
+        assert rule_actions["TodoWrite(*)"] == "allow"
+        assert rule_actions["Task(*)"] == "allow"
         assert rule_actions["Bash(git status)"] == "allow"
-        assert rule_actions["Bash(git diff)"] == "allow"
+        assert rule_actions["Bash(git diff*)"] == "allow"
         assert rule_actions["Bash(git log*)"] == "allow"
-
-        assert rule_actions["Bash(rm -rf*)"] == "deny"
-        assert rule_actions["Bash(sudo *)"] == "deny"
-
-        assert rule_actions["Edit(src/**)"] == "ask"
+        assert rule_actions["Bash(uv run pytest*)"] == "allow"
+        assert rule_actions["Write(*)"] == "ask"
+        assert rule_actions["MultiEdit(*)"] == "ask"
         assert rule_actions["*"] == "ask"
 
     def test_shows_updated_next_steps_message(self, temp_dir) -> None:

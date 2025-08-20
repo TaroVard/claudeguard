@@ -26,7 +26,7 @@ uv tool install claudeguard
 cd your-claude-code-project
 claudeguard install
 
-# Use Claude Code normally - claudeguard works in the background
+# Use Claude Code normally
 claude
 ```
 

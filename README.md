@@ -1,5 +1,7 @@
 # claudeguard
 
+
+
 **claudeguard** enhances Claude Code with automated security decisions using pattern matching and team-shareable profiles.
 
 ## Why claudeguard?

@@ -1,112 +1,85 @@
 # claudeguard
 
-**claudeguard** enhances Claude Code with intelligent pattern matching and team-shareable security profiles for consistent, automated permission decisions.
+**claudeguard** enhances Claude Code with automated security decisions using pattern matching and team-shareable profiles.
 
 ## Why claudeguard?
 
-Claude Code's interactive permission system ensures security but can be repetitive for routine operations. claudeguard builds on this foundation by providing automated pattern-based decisions for common workflows while maintaining full security for sensitive operations. It seamlessly integrates with Claude Code's permission system to give you the best of both worlds: security when you need it, automation when you don't.
+Claude Code's permission prompts are great for security but repetitive for routine tasks. claudeguard automates common decisions while keeping you in control of sensitive operations.
+
+## How it works
+
+**claudeguard** uses the `PreToolUse` Claude Code hook to intercept tool calls and override Claude Code's builtin permission logic
 
 ## Features
 
-- **Reliable pattern matching**: `Edit(src/**)`, `Bash(/git (status|diff)/)`, `Bash(rm -rf*)`
-- **Smart defaults**: Safe operations auto-allowed, dangerous operations denied
-- **Team sharing**: Security policies committed to git in `.claudeguard/profiles/`
+- **Pattern matching**: `Edit(src/**)`, `Bash(/git status/)`, `Bash(rm -rf*)`
+- **Team sharing**: Profiles stored in `.claudeguard/profiles/`
 - **Zero config**: Works immediately with sensible rules
-- **Full transparency**: See exactly which rule matched and why
 
 ## Quick Start
 
-### Installation
-
 ```bash
-# Install as a tool (recommended)
+# Install
 uv tool install claudeguard
 
-# Or add to your project
-uv add claudeguard
-
-# Or use pip
-pip install claudeguard
-```
-
-### Setup
-
-```bash
+# Setup in your project
 cd your-claude-code-project
-claudeguard install    # Configures Claude Code hooks and initializes profiles
-```
+claudeguard install
 
-### Usage
-
-Just use Claude Code normally - claudeguard works transparently in the background!
-
-```bash
-claude  # Enhanced with automated permission decisions
+# Use Claude Code normally - claudeguard works in the background
+claude
 ```
 
 ## How It Works
 
-claudeguard uses pattern matching to automatically make permission decisions:
+claudeguard matches tool calls against rules in `.claudeguard/profiles/default.yaml`:
 
 ```yaml
-# .claudeguard/profiles/default.yaml
 rules:
-  - pattern: "Read(*)"                    # Allow all file reads
+  - pattern: "Read(*)"
     action: allow
-  - pattern: "Edit(*.md)"                 # Allow markdown edits
+  - pattern: "Edit(*.md)"
     action: allow
-  - pattern: "Bash(/git (status|diff)/)"  # Allow safe git commands (regex)
+  - pattern: "Bash(/git (status|diff)/)"
     action: allow
-  - pattern: "Edit(src/**)"               # Ask before editing code
+  - pattern: "Edit(src/**)"
     action: ask
-  - pattern: "Bash(rm -rf*)"              # Block dangerous commands
+  - pattern: "Bash(rm -rf*)"
     action: deny
-  - pattern: "*"                          # Ask for everything else
+  - pattern: "*"
     action: ask
 ```
 
-When Claude Code requests a tool permission, claudeguard:
-1. Matches the operation against your rules (first match wins)
-2. Returns `allow`, `deny`, or `ask` back to Claude Code's permission system
-3. Shows debug info: "Rule matched: Read(*) → allow"
+First matching rule wins. Actions: `allow`, `ask`, `deny`.
 
 ## Commands
 
-- `claudeguard install` - Install hooks and initialize claudeguard in current project
-- `claudeguard status` - Show current configuration
-- `claudeguard create-profile` - Create a new security profile
-- `claudeguard list-profiles` - List available security profiles
-- `claudeguard switch-profile` - Switch to a different security profile
-- `claudeguard delete-profile` - Delete a security profile
-- `claudeguard uninstall` - Remove claudeguard hook from Claude Code
+- `claudeguard install` - Setup in current project
+- `claudeguard status` - Show configuration
+- `claudeguard create-profile` - Create new profile
+- `claudeguard list-profiles` - List profiles
+- `claudeguard switch-profile` - Switch profile
+- `claudeguard delete-profile` - Delete profile
+- `claudeguard uninstall` - Remove from project
 
 ## Pattern Examples
 
-| Pattern | Matches | Typical Action |
-|---------|---------|----------------|
+| Pattern | Matches | Action |
+|---------|---------|--------|
 | `Read(*)` | All file reads | `allow` |
-| `Edit(src/**)` | Edit files in src/ | `ask` |
-| `Edit(*.md)` | Edit markdown files | `allow` |
-| `Bash(/git (status\|diff)/)` | Safe git commands (regex) | `allow` |
-| `Bash(rm -rf*)` | Destructive rm commands | `deny` |
-| `Bash(sudo *)` | All sudo commands | `deny` |
-| `*` | Everything else | `ask` |
+| `Edit(*.md)` | Markdown files | `allow` |
+| `Bash(/git (status\|diff)/)` | Safe git commands | `allow` |
+| `Edit(src/**)` | Code files | `ask` |
+| `Bash(rm -rf*)` | Destructive commands | `deny` |
 
-## Team Workflow
+## Custom Profiles
 
-1. Project lead runs `claudeguard install` and customizes `.claudeguard/profiles/default.yaml`
-2. Commit profile: `git add .claudeguard && git commit -m "Add claudeguard security profile"`
-3. Team members clone repo and run `claudeguard install`
-4. Everyone gets consistent, reliable permissions
-
-## Advanced Usage
-
-### Custom Profiles
+Create profiles for different security levels:
 
 ```yaml
-# .claudeguard/profiles/default.yaml
+# .claudeguard/profiles/strict.yaml
 name: "strict-policy"
-description: "Strict security for production code"
+description: "Strict security for production"
 rules:
   - pattern: "Read(*)"
     action: allow
@@ -122,41 +95,18 @@ rules:
     action: deny
 ```
 
-### Debug Output
-
-claudeguard shows exactly why each decision was made:
-
-```
-claudeguard: Rule matched: Bash(/git (status|diff)/) → allow (Safe git operations)
-claudeguard: Rule matched: Edit(src/**) → ask (Code changes should be reviewed)
-claudeguard: Rule matched: Bash(rm -rf*) → deny (Destructive operations blocked)
-```
-
-## Security Design
-
-- **Fail-safe**: Always fails to "ask", never to "allow"
-- **Input validation**: All tool calls validated and sanitized
-- **Audit trail**: All decisions logged with reasons
-- **Least privilege**: Minimal default permissions
-- **Team oversight**: Policies reviewed and committed to git
-
 ## Development
 
 ```bash
 git clone https://github.com/tarovard/claudeguard
 cd claudeguard
-uv sync                    # Install dependencies
+uv sync                   # Install dependencies
+uv run pre-commit install # Setup git hooks
 
-# Setup pre-commit hooks (recommended)
-uv run pre-commit install  # Install git hooks for automatic code quality
-
-# Development commands
-uv run pytest             # Run tests
-uv run mypy src tests      # Type checking
-uv run ruff check --fix .  # Format and lint
-
-# Pre-commit will automatically run on git commit, or manually:
-uv run pre-commit run --all-files  # Run all hooks manually
+# Test and lint
+uv run pytest            # Run tests
+uv run mypy src tests     # Type checking
+uv run ruff check --fix . # Format and lint
 ```
 
 ## License
